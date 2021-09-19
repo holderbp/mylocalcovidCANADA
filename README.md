@@ -1,1 +1,1 @@
-# mylocalcovidUSA
+# mylocalcovidCANADA
