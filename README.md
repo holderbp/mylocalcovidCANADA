@@ -18,5 +18,5 @@ pip install -r requirements.txt
 4. Then run the app using: ```python app.py```
 5. You should now see the app running at: http://localhost:8050/
 
-### Copied from @jolenezheng's COVIDDashboard on 2021-10-26. Written and maintained by: Jolene Zheng (Waterloo), Shafika Olalekan Koiki (Waterloo), and Ben Holder (GVSU)
+*Copied from @jolenezheng's COVIDDashboard on 2021-10-26. Written and maintained by: Jolene Zheng (Waterloo), Shafika Olalekan Koiki (Waterloo), and Ben Holder (GVSU)*
 
