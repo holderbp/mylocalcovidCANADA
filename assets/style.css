@@ -1,0 +1,54 @@
+.page {
+  padding-top: 5%;
+  min-height: calc(100vh - 40px);
+}
+
+.dropdown .VirtualizedSelectFocusedOption {
+  background-color: rgb(168, 170, 177);
+  color: black;
+}
+
+.input-space {
+  margin-bottom: 5%;
+}
+
+.dropdown-title {
+  color: #000000;
+  font-weight: 300;
+}
+
+.border {
+  padding-bottom: 1%;
+  padding-left: 2%;
+  padding-right: 2%;
+}
+
+.rc-slider-track {
+  background-color: #292b2c;
+}
+
+.rc-slider-dot-active {  
+  border-color: #292b2c;
+  border: solid 2px #292b2c;
+}
+
+.rc-slider-handle {
+  background-color: #292b2c;
+  border-color: #292b2c;
+}
+
+.rc-slider-handle:hover {
+  border-color: #292b2c;
+}
+
+.rc-slider-handle-active:active {
+  border-color: red;
+}
+
+.footer {
+  height: 20px;
+}
+
+.nav-link {
+  color: #fff;
+}
