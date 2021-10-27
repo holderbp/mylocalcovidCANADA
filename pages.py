@@ -1,6 +1,6 @@
-import dash_html_components as html
+import dash.html as html
 import dash_bootstrap_components as dbc
-import dash_core_components as dcc
+import dash.dcc as dcc
 
 introduction_text = dcc.Markdown('''This portal provides resources and tools that could help individuals and policy makers with a scientific, balanced, and evidence-based approach to manage and navigate the COVID-19 Pandemic. It provides historical information, important demographics, and resulting stochastic forecasting for local counties (US) or Health Units (Canada), for adjustable **vaccination** and **face-mask usage** and **social mobility reduction** strategies. The model is simultaneously calibrated against more than 2500 distinct epidemics (over 100,000 reproduction number measurements), over the course of the COVID-19 pandemic.''')
 
@@ -82,7 +82,7 @@ old_navbar = html.Div(
                                 dbc.Col(html.Img(src='assets/canadian_flag.png', height="20px")),
                             ],
                             align="center",
-                            no_gutters=True,
+                            #no_gutters=True,
                         ),
                         href="https://plot.ly",
                     ),

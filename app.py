@@ -9,10 +9,10 @@ import requests
 import time
 import json
 import dash
-import dash_table
-import dash_core_components as dcc
+import dash.dash_table as dash_table
+import dash.dcc as dcc
 import dash_bootstrap_components as dbc
-import dash_html_components as html
+import dash.html as html
 import dash.dependencies as ddp
 import plotly.express as px
 import plotly.graph_objects as go
@@ -3183,9 +3183,8 @@ def calculate_Rt_from_mortality(df_mort):
     #    * Take 14-day rolling average of the resulting R(t)
     #
     df_mort_Rt = df_mort.copy()
-    #print(df_mort_Rt)
     df_mort_Rt['D14'] = \
-        df_mort_Rt['deaths'].rolling(window=14).mean() + Rt_make_D14_nonzero_offset
+        df_mort_Rt['deaths'].rolling(window=14, min_periods=1).mean() + Rt_make_D14_nonzero_offset
     df_mort_Rt['log_D14'] = np.log(df_mort_Rt['D14'])
     if Rt_smooth_lambda14_first:
         df_mort_Rt['lambda_14'] = np.gradient(df_mort_Rt['log_D14'])
