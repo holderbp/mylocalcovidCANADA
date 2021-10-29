@@ -37,7 +37,7 @@ conda env update -f requirements_conda_portal.yml --prune
 
 4. Run the portal app using: ```python covid_portal_app.py```
 
-5. You should now see the app running at: http://localhost:8050/
+5. You should now see the app running at: http://localhost:8050/ or http://127.0.0.1:8050
 
 ### Run the code on a server
 
