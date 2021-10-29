@@ -6,30 +6,40 @@
 
 You will need to install the app's dependencies in a virtual envrionment to be able to run the app.
 
-1. Navigate to the directory where you would like to clone this repo. For example, if I'm currently in my home directory want to clone the repo in a folder called Documents/Projects, I will run: ```cd Documents/Projects```
+1. In a terminal shell, navigate to the directory where you would like to clone this repo, e.g., ``cd ~/Documents/Projects``.
 
 2. Clone the repo using the following command:
-```git clone https://github.com/holderbp/mylocalcovidCANADA.git```
+```
+{
+git clone https://github.com/holderbp/mylocalcovidCANADA.git
+}
+```
 
 3. Use one of the following two options to establish a python virtual environment.
 - **Python Virtual Environment** Run the following commands once you are in the root of your project
-```bash
+```
+{
 python -m venv portal_env
 source portal_env/bin/activate  # Windows: \portal_env\scripts\activate
 pip install -r requirements.txt
+}
 ```
 (This assumes you are running Python 3. If ``python --version`` returns, e.g., 2.7.*, then try ``python3 -m venv portal_env``, or install Python 3). To deactivate your python environment, use the shell command ``deactivate``.
 - **Conda Environment** Create a new conda environment using
-```bash
+```
+{
 conda env create -f requirements_conda_portal.yml
+}
 ```
 and then activate it before running the portal app
 ```bash
 conda activate portal
 ```
 If the ``.yml`` environment file is updated, then update your conda environment with
-```bash
+```
+{
 conda env update -f requirements_conda_portal.yml --prune
+}
 ```
 (This assumes an installation of, e.g., ``miniconda``). To deactivate your conda environment, use ``conda deactivate``.
 
