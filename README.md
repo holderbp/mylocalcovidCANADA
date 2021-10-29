@@ -7,8 +7,10 @@
 You will need to install the app's dependencies in a virtual envrionment to be able to run the app.
 
 1. Navigate to the directory where you would like to clone this repo. For example, if I'm currently in my home directory want to clone the repo in a folder called Documents/Projects, I will run: ```cd Documents/Projects```
+
 2. Clone the repo using the following command:
 ```git clone https://github.com/holderbp/mylocalcovidCANADA.git```
+
 3. Use one of the following two options to establish a python virtual environment.
 - **Python Virtual Environment** Run the following commands once you are in the root of your project
 ```bash
@@ -30,7 +32,9 @@ If the ``.yml`` environment file is updated, then update your conda environment 
 conda env update -f requirements_conda_portal.yml --prune
 ```
 (This assumes an installation of, e.g., ``miniconda``). To deactivate your conda environment, use ``conda deactivate``.
+
 4. Run the portal app using: ```python covid_portal_app.py```
+
 5. You should now see the app running at: http://localhost:8050/
 
 ---
