@@ -13,15 +13,15 @@ You will need to install the app's dependencies in a virtual envrionment to be a
 git clone https://github.com/holderbp/mylocalcovidCANADA.git
 ```
 
-3. Use one of the following two options to establish a python virtual environment.
-- **Python Virtual Environment** Run the following commands once you are in the root of your project
+3. Navigate into the new directory ``mylocalcovidCANADA`` and use one of the following two options to establish a virtual environment.
+- **Python Virtual Environment** 
 ```
 python -m venv portal_env
 source portal_env/bin/activate  # Windows: \portal_env\scripts\activate
 pip install -r requirements_venv_portal.txt
 ```
 (This assumes you are running Python 3. If ``python --version`` returns, e.g., 2.7.*, then try ``python3 -m venv portal_env``, or install Python 3). To deactivate your python environment, use the shell command ``deactivate``.
-- **Conda Environment** Create a new conda environment using
+- **Conda Environment** 
 ```
 conda env create -f requirements_conda_portal.yml
 ```
