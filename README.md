@@ -18,7 +18,7 @@ git clone https://github.com/holderbp/mylocalcovidCANADA.git
 ```
 python -m venv portal_env
 source portal_env/bin/activate  # Windows: \portal_env\scripts\activate
-pip install -r requirements.txt
+pip install -r requirements_venv_portal.txt
 ```
 (This assumes you are running Python 3. If ``python --version`` returns, e.g., 2.7.*, then try ``python3 -m venv portal_env``, or install Python 3). To deactivate your python environment, use the shell command ``deactivate``.
 - **Conda Environment** Create a new conda environment using

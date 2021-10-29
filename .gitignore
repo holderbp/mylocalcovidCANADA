@@ -1,0 +1,7 @@
+portal_env
+*.pyc
+.DS_Store
+.vscode
+temp.py
+tempfunc.py
+*~
