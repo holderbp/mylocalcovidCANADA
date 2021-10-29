@@ -6,14 +6,14 @@
 
 You will need to install the app's dependencies in a virtual envrionment to be able to run the app.
 
-1. In a terminal shell, navigate to the directory where you would like to clone this repo, e.g., ``cd ~/Documents/Projects``.
+1. In a terminal shell, navigate to the directory where you would like to install the app, e.g., ``cd ~/Documents/Projects``.
 
-2. Clone the repo using the following command:
+2. Clone this repository using the following command:
 ```
 git clone https://github.com/holderbp/mylocalcovidCANADA.git
 ```
 
-3. Navigate into the new directory ``mylocalcovidCANADA`` and use one of the following two options to establish a virtual environment.
+3. Navigate into the new directory with ``cd mylocalcovidCANADA`` and use one of the following two options to establish a virtual environment.
 - **Python Virtual Environment** 
 ```
 python -m venv portal_env
