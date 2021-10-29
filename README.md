@@ -33,7 +33,7 @@ If the ``.yml`` environment file is updated, then update your conda environment 
 ```
 conda env update -f requirements_conda_portal.yml --prune
 ```
-(This assumes an installation of, e.g., ``miniconda``). To deactivate your conda environment, use ``conda deactivate``.
+(This assumes an installation of, e.g., [miniconda](https://docs.conda.io/en/latest/miniconda.html)). To deactivate your conda environment, use ``conda deactivate``.
 
 4. Run the portal app using: ```python covid_portal_app.py```
 
