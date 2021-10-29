@@ -2,7 +2,7 @@
 
 ## Setup
 
-### Run the code
+### Run the code locally
 
 You will need to install the app's dependencies in a virtual envrionment to be able to run the app.
 
@@ -38,6 +38,10 @@ conda env update -f requirements_conda_portal.yml --prune
 4. Run the portal app using: ```python covid_portal_app.py```
 
 5. You should now see the app running at: http://localhost:8050/
+
+### Run the code on a server
+
+To be added...
 
 ---
 *Copied from @jolenezheng's [COVIDDashboard](https://github.com/jolenezheng/COVIDDashboard) on 2021-10-26. Written and maintained by: Jolene Zheng (Waterloo), Shafika Olalekan Koiki (Waterloo), and Ben Holder (GVSU)*
