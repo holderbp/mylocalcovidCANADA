@@ -9,15 +9,30 @@ You will need to install the app's dependencies in a virtual envrionment to be a
 1. Navigate to the directory where you would like to clone this repo. For example, if I'm currently in my home directory want to clone the repo in a folder called Documents/Projects, I will run: ```cd Documents/Projects```
 2. Clone the repo using the following command:
 ```git clone https://github.com/holderbp/mylocalcovidCANADA.git```
-3. Run the following commands once you are in the root of your project
+3. Use one of the following two options to establish a python virtual environment.
+- **Python Virtual Environment** Run the following commands once you are in the root of your project
 ```bash
-python -m venv venv
-source venv/bin/activate  # Windows: \venv\scripts\activate
+python -m venv portal_env
+source portal_env/bin/activate  # Windows: \portal_env\scripts\activate
 pip install -r requirements.txt
 ```
-4. Then run the app using: ```python app.py```
+(This assumes you are running Python 3. If ``python --version`` returns, e.g., 2.7.*, then try ``python3 -m venv portal_env``, or install it.) To deactivate your python environment, use the shell command ``deactivate``.
+- **Conda Environment** Create a new conda environment using
+```bash
+conda env create -f requirements_conda_portal.yml
+``
+and then activate it before running the portal app
+```bash
+conda activate portal
+```
+If the ``.yml`` environment file is updated, then update your conda environment with
+```bash
+conda env update -f requirements_conda_portal.yml --prune
+```
+(This assumes an installation of, e.g., ``miniconda``.) To deactivate your conda environment, use ``conda deactivate``.
+4. Run the portal app using: ```python covid_portal_app.py```
 5. You should now see the app running at: http://localhost:8050/
 
 ---
-*Copied from @jolenezheng's COVIDDashboard on 2021-10-26. Written and maintained by: Jolene Zheng (Waterloo), Shafika Olalekan Koiki (Waterloo), and Ben Holder (GVSU)*
+*Copied from @jolenezheng's [COVIDDashboard](https://github.com/jolenezheng/COVIDDashboard) on 2021-10-26. Written and maintained by: Jolene Zheng (Waterloo), Shafika Olalekan Koiki (Waterloo), and Ben Holder (GVSU)*
 

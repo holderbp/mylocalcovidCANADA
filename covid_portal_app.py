@@ -9,11 +9,16 @@ import requests
 import time
 import json
 import dash
-import dash.dash_table as dash_table
-import dash.dcc as dcc
-import dash_bootstrap_components as dbc
-import dash.html as html
 import dash.dependencies as ddp
+import dash_table
+import dash_core_components as dcc
+import dash_bootstrap_components as dbc
+import dash_html_components as html
+# newer versions of dash:
+#import dash.dash_table as dash_table
+#import dash.dcc as dcc
+#import dash_bootstrap_components as dbc
+#import dash.html as html
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio

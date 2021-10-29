@@ -1,6 +1,10 @@
-import dash.html as html
+import dash_html_components as html
 import dash_bootstrap_components as dbc
-import dash.dcc as dcc
+import dash_core_components as dcc
+## for newer versions of dash (must upgrade "requirements")
+#import dash.html as html
+#import dash_bootstrap_components as dbc
+#import dash.dcc as dcc
 
 introduction_text = dcc.Markdown('''This portal provides resources and tools that could help individuals and policy makers with a scientific, balanced, and evidence-based approach to manage and navigate the COVID-19 Pandemic. It provides historical information, important demographics, and resulting stochastic forecasting for local counties (US) or Health Units (Canada), for adjustable **vaccination** and **face-mask usage** and **social mobility reduction** strategies. The model is simultaneously calibrated against more than 2500 distinct epidemics (over 100,000 reproduction number measurements), over the course of the COVID-19 pandemic.''')
 
