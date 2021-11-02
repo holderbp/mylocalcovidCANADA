@@ -19,6 +19,7 @@ dependencies:
   - dash=1.19.0
   - openpyxl
   - uwsgi
+  - gunicorn=19
   - lxml
   - html5lib
   - pip
