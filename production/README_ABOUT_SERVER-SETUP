@@ -1,0 +1,154 @@
+
+2021-11-08 BPH
+
+I adjusted a few things from the initial server setup, which was
+originally accomplished by Jolene Zheng, Merliza Salonga, and Kate
+Wood on April 16.  The setup is basically the same, i.e., governed by
+this schematic:
+
+python-dash-app <--> wsgi-interface <--> gunicorn-http-server <--> nginx-webserver
+
+But I moved around a few configuration files, I changed the portal's
+source directory from COVIDDashboard to mylocalcovidCANADA, to match
+our new github repository on my github:
+
+https://github.com/holderbp/mylocalcovidCANADA
+
+and I adjusted the file permissions on these files and established a
+file permissions and user/group protocol for working with these files
+(see the README_ABOUT_PERMISSIONS files).
+
+The basic working of the web-serviced portal is as follows (to flesh
+out the details of the basic schematic picture given above):
+
+  * The mylocalcovid portal (mylocalcovidCANADA/covid_portal_app.py)
+    is written in python using the Dash module, with abundant use of
+    Plotly for the graphics. When the dash app is run during
+    development on a developer's local machine, it serves the app to
+    the developer's local browser (127.0.0.1:8050), but there is no
+    built in way to serve the app onto the web.
+
+  * GUnicorn ("the green unicorn") is a python-based HTTP server.  If
+    a python script, my_app.py, has a class called "app" containing
+    some http information (see the minimal example at
+    https://gunicorn.org), then the command "gunicorn -w 4 myapp:app"
+    will serve the app to the local host. One can write a flask app
+    within python, or use Dash, which creates its own flask app.
+
+  * On one "end", Gunicorn communicates with the dash app through
+    WSGI.  I'm not exactly clear how this works, but for the
+    Dash-Gunicorn interface we have:
+
+       # within the main python script for the portal (covid_portal_app.py)
+       app = dash.Dash(__name__, extern ... )
+       
+       # the full WSGI interface file (wsgi_covid_portal_app.py):
+       from covid_portal_app import app
+       if __name__ == "__main__":
+           app.run()
+
+       # in the gunicorn call (within the systemd service, /etc/systemd/system/mylocalcovid.service):
+       gunicorn --workers 3 --bind unix:covid_portal_app.sock -m 007 wsgi_covid_portal_app:app.server
+
+    So, gunicorn looks in the wsgi file for "app", which has been
+    imported from source code for the portal, and then uses its
+    submodule app.server.  I think maybe we don't need the "WSGI
+    interface file", i.e., that the dash app itself uses the WSGI
+    protocol and we could direct gunicorn directly to it.
+
+  * On the other "end", Gunicorn communicates with Nginx (pronounced
+    "Engine X") the web server, which in this case is serving as a
+    "reverse proxy server" for Gunicorn.  Note in the above gunicorn
+    command (which is run by a systemd service) that gunicorn "binds"
+    to a unix file (covid_portal_app.sock).  So once Gunicorn starts
+    running it creates that "socket" file in the working directory.
+    Then Nginx is instructed to connect to that socket and send all
+    incoming requests through that socket to Gunicorn and the server.
+
+  * The web server Nginx, once installed on the OS, is configured to
+    host individual sites (i.e., to accept http requests to the server
+    and its sub-pages through port 80) with configuration files
+    specific to each page (e.g., mylocalcovid).  On a Debian system,
+    these configuration files are located in
+    
+       /etc/nginx/sites-available
+
+    and to activate one of them you make a symbolic link to its
+    configuration file in
+
+       /etc/nginx/sites-enabled
+
+    On other systems (e.g., this Fedora system), the configuration
+    files are placed in
+
+       /etc/nginx/conf.d
+
+    and are activated if they have a ".conf" suffix at the end of
+    their filenam (e.g., mylocalcovid.conf). To deactivate a site,
+    just change "conf" to "disable" on the filename.
+
+  * The configuration file for nginx (mylocalcovid.conf) is:
+  
+         --------- /etc/nginx/conf.d/mylocalcovid.conf -------------
+    	 server {
+       	 	listen 80;
+       		server_name 35.39.188.51;
+
+       		location / {
+                	 include proxy_params;
+                	 proxy_pass http://unix:/var/www/html/canada_mylocalcovid/covid_portal_app.sock;
+       	        }
+	 }
+	 -----------------------------------------------------------
+
+    So you see that for requests at the top-level location on the
+    server "/", it serves as a proxy to the unix socket created by
+    gunicorn.
+
+  * To restart the service for the server (running Gunicorn):
+
+       sudo systemctl stop mylocalcovid
+       sudo systemctl daemon-reload  # if any files have been edited
+       sudo systemctl start mylocalcovid
+
+    or, if no files have been edited, just:
+
+       sudo systemctl restart mylocalcovid
+
+    And to restart the nginx service
+
+       sudo systemctl restart nginx
+
+  * When errors occur, Gunicorn will report them to the system log:
+
+       sudo cat /var/log/syslog
+
+    And Nginx will report them to its own error log
+
+       sudo cat /var/log/nginx/error.log
+
+    There is also an access log for nginx: /var/log/nginx/access.log
+
+To set this all up, I followed Jolene and Merliza, by using the
+article they found and followed ("starting at Step 4"):
+
+https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-18-04
+
+But there are many other references that helped (see below).
+
+==== References ====
+
+# Main article on how to serve a dash app through gunicorn and nginx (and another, related, article)
+https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-18-04
+https://www.digitalocean.com/community/tutorials/how-to-set-up-uwsgi-and-nginx-to-serve-python-apps-on-ubuntu-14-04#definitions-and-concepts
+
+# Explanations of services and the systemd software suite of system daemons
+https://en.wikipedia.org/wiki/Systemd
+https://bitlaunch.io/blog/a-beginners-guide-to-systemctl/
+
+# Information on gunicorn the http server that is run as a service and interfaces with nginx
+https://gunicorn.org/#quickstart
+https://docs.gunicorn.org/en/stable/index.html
+https://en.wikipedia.org/wiki/Gunicorn
+https://rahmonov.me/posts/run-a-django-app-with-gunicorn-in-ubuntu-16-04/
+https://stackoverflow.com/questions/43044659/what-is-the-purpose-of-using-nginx-with-gunicorn

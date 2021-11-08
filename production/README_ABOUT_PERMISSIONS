@@ -1,0 +1,44 @@
+
+
+2021-11-01 BPH
+
+For the mylocalcovid app(s), I decided to follow the protocol outlined
+in this canonical question/answer on serverfault.com:
+
+https://serverfault.com/questions/357108
+
+regarding setting permissions for web development and hosting.  To
+wit:
+
+* all users that are developers of the app should be members of the
+  group dev-mlc.  That group will have read-write-execute permissions
+  on all files for web hosting.
+
+* Since the web-server user (here, nginx; sometimes, www-data) is a
+  proxy for all external visitors to the site, its permissions are
+  restricted to read-only (and executable for visiting directories),
+  unless it needs write permissions for something (for this app, there
+  is no "upload" options, so there is no need for write privileges).
+
+* Therefore whenever changes are made to the server scripts (e.g.,
+  when a git pull is run by a user), the script
+
+./set_permissions_mylocalcovid <directory>
+
+ (where <directory> is usually mylocalcovidCANADA), should be run to
+ make the web-server user the *owner* of the portal files, but with
+ fewer permissions than the dev-mlc group members (of which it is not
+ a member).  The script executes the following commands:
+  
+sudo chown -R nginx canada_mylocalcovid
+sudo chgrp -R dev-mlc canada_mylocalcovid
+sudo chmod -R 460 canada_mylocalcovid
+sudo chmod -R ug+X canada_mylocalcovid
+
+* All of this is silly on such a small operation, but it sounds like
+  best practice for the case where (i) not all developers are, or
+  should be, root (ii) the web server user is given minimal privileges
+  on the server to prevent external attack, and (iii) there are other
+  users on the server who should be prevented from viewing of the
+  server contents.
+
