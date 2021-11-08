@@ -1,0 +1,32 @@
+
+* This repository is stored at:
+
+https://github.com/holderbp/mylocalcovidCANADA
+
+and was originally cloned here via
+
+git clone https://github.com/holderbp/mylocalcovidCANADA.git
+
+* To set the username properly for the ability to push new updates to
+  the repository, I ran:
+
+git config --global --edit
+
+* After making changes:
+
+git pull
+git status
+git add <files/directories>
+git commit -m "Some message about what is happening"
+
+* To set the repository as remote origin (and use SSH to connect):
+
+git remote set-url origin git@github.com:holderbp/mylocalcovidUSA.git
+
+* I created SSH Key on the server for myself and copied the public key to my Github account under:
+
+<user dropdown menu at top right>/Settings/SSH and GPG Keys
+
+* Then to push changes:
+
+git push
