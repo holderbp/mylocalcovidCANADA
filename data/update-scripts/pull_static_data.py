@@ -15,12 +15,10 @@ def downloadAndCleanFile(url, newFilePath, replaceMappings):
     writeFile.write(newFile)
 
 mortalityUrl = 'https://raw.githubusercontent.com/ccodwg/Covid19Canada/master/timeseries_hr/mortality_timeseries_hr.csv'
-#mortalityFilePath = "/var/www/html/COVIDDashboard/data/mortality.csv"
-mortalityFilePath = "../mortality.csv"
+mortalityFilePath = "/var/www/html/mylocalcovidCANADA/data/mortality.csv"
 
 casesUrl = 'https://raw.githubusercontent.com/ccodwg/Covid19Canada/master/timeseries_hr/cases_timeseries_hr.csv'
-#casesFilePath = "/var/www/html/COVIDDashboard/data/cases.csv"
-casesFilePath = "../cases.csv"
+casesFilePath = "/var/www/html/mylocalcovidCANADA/data/cases.csv"
 
 replaceMappings = [
   ('è', 'e'),

@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve mylocalcovidCANADA
+After=network.target
+
+[Service]
+User=bholder
+Group=nginx
+WorkingDirectory=/var/www/html/mylocalcovidCANADA
+Environment="PATH=/home/bholder/local/src/miniconda3/envs/portal/bin"
+ExecStart=gunicorn --bind unix:covid_portal_app.sock -m 007 wsgi_covid_portal_app:app.server
+
+[Install]
+WantedBy=multi-user.target

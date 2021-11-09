@@ -1,0 +1,18 @@
+[Unit]
+Description=Gunicorn instance to serve mylocalcovid
+After=network.target
+
+[Service]
+User=nginx
+Group=nginx
+# new server location
+#WorkingDirectory=/var/www/html/mylocalcovidCANADA
+#Environment="PATH=/var/www/html/mylocalcovidCANADA"
+#ExecStart=gunicorn --bind unix:covid_portal_app.sock wsgi:app.server
+# old server location
+WorkingDirectory=/var/www/html/COVIDDashboard
+Environment="PATH=/var/www/html/COVIDDashboard"
+ExecStart=gunicorn --bind unix:covid_app.sock wsgi:app.server
+
+[Install]
+WantedBy=multi-user.target

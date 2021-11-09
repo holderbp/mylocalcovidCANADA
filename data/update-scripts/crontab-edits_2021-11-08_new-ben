@@ -1,0 +1,5 @@
+
+0 5 * * * bash /var/www/html/mylocalcovidCANADA/data/update-scripts/weather_update_script.sh  > /var/www/html/mylocalcovidCANADA/data/update-scripts/logs/weather_out 2> /var/www/html/mylocalcovidCANADA/data/update-scripts/logs/weather_err
+0 5 * * * /usr/bin/python3 /var/www/html/mylocalcovidCANADA/data/pull_static_data.py > /var/www/html/mylocalcovidCANADA/data/update-scripts/logs/static_out 2> /var/www/html/mylocalcovidCANADA/data/update-scripts/logs/static_err
+#0 5 * * 0 /usr/bin/python3 /var/www/html/mylocalcovidCANADA/data/get_google_mobility_data.py > /var/www/html/mylocalcovidCANADA/data/update-scripts/logs/mobilityget_out 2> /var/www/html/mylocalcovidCANADA/data/update-scripts/logs/mobilityget_err
+0 5 * * 0 bash /var/www/html/mylocalcovidCANADA/data/mobility_update_script.sh > /var/www/html/mylocalcovidCANADA/data/update-scripts/logs/mobilityupdate_out 2> /var/www/html/mylocalcovidCANADA/data/update-scripts/logs/mobilityupdate_err

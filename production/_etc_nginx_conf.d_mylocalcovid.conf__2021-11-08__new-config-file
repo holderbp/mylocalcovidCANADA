@@ -1,0 +1,8 @@
+server {
+       listen 80;
+       server_name mylocalcovid.uwaterloo.ca;
+       location / {
+       		include proxy_params;
+		proxy_pass http://unix:/var/www/html/mylocalcovidCANADA/covid_portal_app.sock;
+	}
+}

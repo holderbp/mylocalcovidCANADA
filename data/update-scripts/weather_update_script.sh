@@ -13,7 +13,10 @@
 #    bash weather_update_script.sh > stdout_weather_script 2> stderr_weather_script
 #
 
-cd ../weather
+# use the conda environment "portal" 
+export PATH=/home/bholder/local/src/miniconda3/envs/portal/bin:${PATH}
 
-$(which python3) get_actual_avg_weather_all_health_regions.py update_raw_data_two_months && \
-    $(which python3) get_actual_avg_weather_all_health_regions.py create_actual_avg_all 
+cd /var/www/html/mylocalcovidCANADA/data/weather
+
+python get_actual_avg_weather_all_health_regions.py update_raw_data_two_months && \
+   python get_actual_avg_weather_all_health_regions.py create_actual_avg_all 

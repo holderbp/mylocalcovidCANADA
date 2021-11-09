@@ -1,0 +1,5 @@
+# Job to run weather script
+0 5 * * * bash /var/www/html/COVIDDashboard/data/weather/weather_update_script.sh > /var/www/html/COVIDDashboard/data/weather/script_output 2> /var/www/html/COVIDDashboard/data/weather/script_err_output
+0 5 * * * /usr/bin/python3 /var/www/html/COVIDDashboard/data/pull_static_data.py
+#0 5 * * 0 /usr/bin/python3 /var/www/html/COVIDDashboard/data/get_google_mobility_data.py
+0 5 * * 0 bash /var/www/html/COVIDDashboard/data/mobility_update_script.sh
