@@ -2389,11 +2389,6 @@ def logistic_function(t, offset, height, t0, delta_t_99):
 
 def get_last_trends_mob_vaxrate_for_region(province_name, region_name, max_vax_percent):
     """Get values for sliders based on health region"""
-    # get the 7-day rolling average of mobility for the region
-    df_mob = get_hr_mob_df(province_name, region_name)
-    # and the last value of that rolling average
-    last_mob = -1*get_last_val('mob', df_mob)
-    
     # load fraction_vaccinated data and get last value
     df_vax, first_vax_data_date = \
         get_hr_vax_data(province_name, region_name, max_vax_percent)
@@ -2413,22 +2408,40 @@ def get_last_trends_mob_vaxrate_for_region(province_name, region_name, max_vax_p
     # for the province or the health region
     last_vax_rate_percent = last_vax_rate_per_week * 100 
 
+    #=== Get the 7-day rolling average of mobility for the region
+    df_mob = get_hr_mob_df(province_name, region_name)
+    # and get a 21d average of that average
+    last_mob = -1*get_last_val('mob', df_mob, longavg=True)
+    
     #=== Get 7-day rolling average of Google trends
     df_trends = get_hr_trends_df(province_name, region_name)
     # and the last value of that average
-    last_trends = get_last_val('trends', df_trends)
+    last_trends = get_last_val('trends', df_trends, longavg=True)
 
     return last_trends, last_mob, last_vax_rate_percent    
     
-def get_last_val(type_str, datavar):
+def get_last_val(type_str, datavar, longavg=True):
     """Get last value in various dataframes"""
-    if (type_str == 'mob'):
-        # get last rolling average from dataframe of mobility
-        return datavar['workplaces_percent_change_from_baseline'].to_list()[-1]
-    elif (type_str == 'vax'):
+    # For Mob/Trends (noisy):
+    #
+    #     if longavg=True, get the 21-day rolling average (of the 7d avg)
+    #
+    if (type_str == 'vax'):
         return datavar['fraction_vaccinated'].to_list()[-1]
+    elif (type_str == 'mob'):
+        thestr = 'workplaces_percent_change_from_baseline'
+        if longavg:
+            return datavar[thestr].rolling(window=21).mean().to_list()[-1]
+        else:
+            return datavar[thestr].to_list()[-1]
+        # get last rolling average from dataframe of mobility
+            return datavar['workplaces_percent_change_from_baseline'].to_list()[-1]
     elif (type_str == 'trends'):
-        return datavar['trend_val'].to_list()[-1]
+        thestr = 'trend_val'
+        if longavg:
+            return datavar[thestr].rolling(window=21).mean().to_list()[-1]
+        else:
+            return datavar[thestr].to_list()[-1]
 
 def get_val_on_date(type_str, datavar, day):
     """Get value on a date from various dataframes"""    
