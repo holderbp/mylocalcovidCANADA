@@ -26,6 +26,9 @@ import plotly.colors as pc
 from textwrap import dedent
 from dateutil.relativedelta import relativedelta
 from pages import *
+import warnings
+warnings.filterwarnings("error")
+
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -127,13 +130,11 @@ filename_healthregion_static_data_map = 'data/health_regions_static_data2.csv'
 default_number_of_simulations = 5
 
 #=== Error applied daily can be random or random but correlated over 14d period
+#    But from experimentation, it seems like correlated normal is too much
+#    uncertainty.  
 #
-#  options: ['normal', '14d_correlated_normal']
-#
-#      seems like correlated normal is too much uncertainty
-#
-simulation_error_type = 'normal' 
-
+simulation_error_type = 'normal'  # ['normal', '14d_correlated_normal']
+simulation_error_model = "new_oct2021"  # ["orig_feb2021", "new_oct2021"]
 
 #=== Simulation options
 #
@@ -283,51 +284,106 @@ maximum_vaccine_efficacy = 0.9 # 90%
 # COVID-19 epidemic data in all US Counties:
 #
 #       In brackets, model version:
-#              [2021-05-23, 2021-05-01]
+#              [2021-10-06, 2021-05-23, 2021-05-01]
 #
-model_index_to_use = 1  # try to keep most recent in first slot
+# NOTES ON MODEL VERSIONS:
+#
+#      - 2021-10-06 --- adding in Delta variant and more
+#            * has a step function for new Delta transmission Summer 2021
+#            * has a new dependence on death fraction (see niayesh's manuscript)
+#
+#      - 2021-05-23 --- trying to fix the original version
+#
+#      - 2021-05-01 --- original version
+#            * has some weird issues, e.g., 
+#
+#
+model_index_to_use = 2  # try to keep most recent in first slot
 model_pars = {
-    'C_vaccination_rate' : [-0.201659, -0.202278],
-    'C_inverse_tauI_0' : [0.039689, 0.0398673],
-    'offset_annual_death' : [4467.0, 4467.0],
-    'C_inverst_tauI_logAD' : [0.00626438, 0.00654545],
-    'offset_N_household' : [2.7, 2.7],
-    'C_inverst_tauI_HN' : [-0.0215527, -0.0201251],
-    'C_covid_death_past_two_months' : [-35.8317, -34.5879],
-    'C_covid_death_prior_to_two_months' : [-1.50458, -1.51981],
-    'C_logkA_0' : [-5.15327, -7.50188],
-    'C_mobility_two_weeks_ago' : [0.0122074, 0.011227],
-    'C_mobility_four_weeks_ago' : [0.0297732, 0.0296737],
-    'offset_temp-cubic' : [None, 26.58],
-    'C_temp-cubic_quadratic' : [None, 0.00476657],
-    'C_temp-cubic_cubic' : [None, 0.000143682],    
-    'offset_temp-tanh' : [12.7384, None],
-    'C_temp-tanh' : [-0.296128, None],
-    'C_trends' : [-0.0256702, -0.0244824],
-    'model_temp_type' : ['tanh', 'cubic'],
-    'model_sparsity_type' : ['new', 'oldbad'],
+    'C_logkA_0' : [-3.67955, -5.15327, -7.50188],
+    'C_mobility_two_weeks_ago' : [0.0, 0.0122074, 0.011227],
+    'C_mobility_four_weeks_ago' : [0.0512637, 0.0297732, 0.0296737],
+    'C_k_vax_six_weeks' : [-1.83525, 0.0, 0.0],
+    'model_temp_type' : ['tanh', 'tanh_half', 'cubic'],
+    'offset_temp-cubic' : [None, None, 26.58],
+    'C_temp-cubic_quadratic' : [None, None, 0.00476657],
+    'C_temp-cubic_cubic' : [None, None, 0.000143682],    
+    'offset_temp-tanh' : [15.244, 12.7384, None],
+    'C_temp-tanh' : [-0.364323, -0.296128, None],
+    'model_trends_type' : ['ramp', 'noramp', 'noramp'],    
+    'C_trends' : [-0.00815515, -0.0256702, -0.0244824],
+    'model_sparsity_type' : ['oct2021_fixed',
+                             'may2021_notworking',
+                             'original_wrong_but_working'],
+    'model_pwpd_dependence' : ['pwpd_w_sparsity_power',
+                               'pwpd80',
+                               'pwpd80'],
+    'model_death_dependence' : ['powerlaw_two_month',
+                                'simple_two_month',
+                                'simple_two_month'],
+    'C_covid_death_total' : [-3.61672, None, None],
+    'C_covid_death_past_two_months' : [-11.3724*2.20001, -35.8317, -34.5879],
+    'C_covid_death_prior_to_two_months' : [None, -1.50458, -1.51981],
+    'C_covid_death_power' : [0.371871, None, None],
+    'model_prop_unvax_dependence' : ['exp_6wk',
+                                     'standard_4wk',
+                                     'standard_4wk'],
+    'model_tauI_dependence' : ["exp_household_and_lin_dailydeath",
+                               "original_annual_death_and_household",
+                               "original_annual_death_and_household"],
+    'C_inverse_tauI_0' : [0.0, 0.039689, 0.0398673],
+    'offset_annual_death' : [None, 4467.0, 4467.0],
+    'C_inverse_tauI_logAD' : [None, 0.00626438, 0.00654545],
+    'offset_N_household' : [2.7, 2.7, 2.7],
+    'C_inverse_tauI_HN' : [-0.0357106, -0.0215527, -0.0201251],
+    'C_inverse_tauI_HN_B' : [-0.421876, None, None],
+    'C_inverse_tauI_dd' : [0.628129, None, None],
+    'C_delta' : [1.18112, 0.0, 0.0],
+    'account_for_delta_variant' : [True, False, False],
+    'offset_delta_months' : [8.5, None, None],
+    'C_vaccination_rate' : [-0.239285, -0.201659, -0.202278],
     }
-C_vaxrate = model_pars['C_vaccination_rate'][model_index_to_use]
-C_inv_tauI_0 = model_pars['C_inverse_tauI_0'][model_index_to_use]
-offset_annual_death = model_pars['offset_annual_death'][model_index_to_use]
-C_inv_tauI_logAD = model_pars['C_inverst_tauI_logAD'][model_index_to_use]
-offset_N_household =  model_pars['offset_N_household'][model_index_to_use]
-C_inv_tauI_HN = model_pars['C_inverst_tauI_HN'][model_index_to_use]
-C_deathA = model_pars['C_covid_death_past_two_months'][model_index_to_use]
-C_deathB = model_pars['C_covid_death_prior_to_two_months'][model_index_to_use]
 C_logkA0 = model_pars['C_logkA_0'][model_index_to_use]
-C_mobA = model_pars['C_mobility_two_weeks_ago'][model_index_to_use]
-C_mobB = model_pars['C_mobility_four_weeks_ago'][model_index_to_use]
+C_mob_twowk = model_pars['C_mobility_two_weeks_ago'][model_index_to_use]
+C_mob_fourwk = model_pars['C_mobility_four_weeks_ago'][model_index_to_use]
+C_k_vax_six_weeks = model_pars['C_k_vax_six_weeks'][model_index_to_use]
+C_trends = model_pars['C_trends'][model_index_to_use]
+model_trends_dependence_type = \
+    model_pars['model_trends_type'][model_index_to_use]
 offset_temp_cubic = model_pars['offset_temp-cubic'][model_index_to_use]
 C_temp_cubic_A = model_pars['C_temp-cubic_quadratic'][model_index_to_use]
 C_temp_cubic_B = model_pars['C_temp-cubic_cubic'][model_index_to_use]
+C_delta = model_pars['C_delta'][model_index_to_use]
 offset_temp_tanh = model_pars['offset_temp-tanh'][model_index_to_use]
 C_temp_tanh = model_pars['C_temp-tanh'][model_index_to_use]
-C_trends = model_pars['C_trends'][model_index_to_use]
 model_temperature_dependence_type = \
     model_pars['model_temp_type'][model_index_to_use]
 model_sparsity_function_type = \
     model_pars['model_sparsity_type'][model_index_to_use]
+model_pwpd_dependence = \
+    model_pars['model_pwpd_dependence'][model_index_to_use]
+model_death_dependence = \
+    model_pars['model_death_dependence'][model_index_to_use]
+C_death_total = model_pars['C_covid_death_total'][model_index_to_use]
+C_death_past_two_months = \
+    model_pars['C_covid_death_past_two_months'][model_index_to_use]
+C_death_prior_to_two_months = \
+    model_pars['C_covid_death_prior_to_two_months'][model_index_to_use]
+C_death_power = model_pars['C_covid_death_power'][model_index_to_use]
+model_prop_unvax_dependence = \
+    model_pars['model_prop_unvax_dependence'][model_index_to_use]
+model_tauI_dependence = \
+    model_pars['model_tauI_dependence'][model_index_to_use]
+C_inv_tauI_0 = model_pars['C_inverse_tauI_0'][model_index_to_use]
+offset_annual_death = model_pars['offset_annual_death'][model_index_to_use]
+C_inv_tauI_logAD = model_pars['C_inverse_tauI_logAD'][model_index_to_use]
+offset_N_household =  model_pars['offset_N_household'][model_index_to_use]
+C_inv_tauI_HN = model_pars['C_inverse_tauI_HN'][model_index_to_use]
+C_inv_tauI_HN_B = model_pars['C_inverse_tauI_HN_B'][model_index_to_use]
+C_inv_tauI_daily_death = model_pars['C_inverse_tauI_dd'][model_index_to_use]
+C_vaxrate = model_pars['C_vaccination_rate'][model_index_to_use]
+offset_delta_months = model_pars['offset_delta_months'][model_index_to_use]
+account_for_delta_variant = model_pars['account_for_delta_variant'][model_index_to_use]
 
 #===================================================
 #===========   Misc Global parameters   ============
@@ -2563,7 +2619,7 @@ def get_logsmoothed_initial_mortality(the_date, df):
     # of the dateframe if they contain zeros
     dfnew['logdeaths'] = 0.0
     for index, row in dfnew.iterrows():
-        if row.deaths == 0.0:
+        if ( (row.deaths == 0.0) | pd.isnull(row.deaths) ):
             # no data from zero-mortality days 
             dfnew.at[index, 'logdeaths'] = np.nan
         else:
@@ -2619,14 +2675,15 @@ def get_forecasted_mortality(province_name, region_name,
     annual_death = get_annual_death(province_name, region_name)
     # Average number of people/household
     N_household = get_avg_house(province_name, region_name)
-    # Population-weighted population density (PWPD)
+    # Population-weightedp opulation density (PWPD)
     #  and pwpd_80 = PWPD * (fraction of pop over 80)
     pwpd = get_pwpd(province_name, region_name)
     pwpd_80 = pwpd * get_frac_pop_over_80(province_name, region_name)
-    # Population sparsity value
+    # Population sparsity value (and a frequently used power depending on it)
     land_area = get_land_area(province_name, region_name)
     pop_sparsity = math.log( (total_pop/land_area) / pwpd ) / math.log(0.25**2/land_area)
-    
+    pop_sparsity_power = 1.0/(2.0 - 2.0*pop_sparsity)
+    pop_sparsity_power_orig = 1.0/(2.0 - pop_sparsity / 2.0)
     #=== Get mortality df up to (and including) the forecast_startdate_str
     #    using a copy of the already loaded region-specific mortality df.
     #
@@ -2714,8 +2771,10 @@ def get_forecasted_mortality(province_name, region_name,
     #=== Create some time offset values
     two_weeks = datetime.timedelta(days=14)
     four_weeks = datetime.timedelta(days=28)
-    fortytwo_days = datetime.timedelta(days=42)
-    two_months = datetime.timedelta(days=60)    
+    six_weeks = datetime.timedelta(days=42)
+    two_months = datetime.timedelta(days=60)
+    apr2020 = np.datetime64("2020-04-15")
+    jan2021 = np.datetime64("2021-01-01")    
     
     #=== Loop over dates of the forecast period
     for index, row in df_mort_new.iterrows():
@@ -2726,11 +2785,16 @@ def get_forecasted_mortality(province_name, region_name,
             date_in_forecast_str = date_in_forecast.strftime('%Y-%m-%d')
             # used to calculated predicted vaccination in the future
             days_since_today =  (date_in_forecast - datetime.datetime.now()).days
+            # get time for ramping up google trends values
+            months_since_apr2020 = (date_in_forecast - apr2020).days / 30.0
+            # get time for turning on Delta variant transition
+            months_since_jan2021 = (date_in_forecast - jan2021).days / 30.0
             
             #=== xHerd is Total Covid Death/Annual Death
             total_deaths = \
                 df_mort_new[df_mort_new.date < date_in_forecast]['deaths'].sum()
             xHerd = total_deaths / annual_death
+            covid_death_frac_total = xHerd
             #=== xHerd2 is the total deaths prior to two-months-ago
             total_deaths_prior_to_two_months_ago = \
                 df_mort_new[df_mort_new.date
@@ -2738,11 +2802,19 @@ def get_forecasted_mortality(province_name, region_name,
             xHerd2 = total_deaths_prior_to_two_months_ago / annual_death
             covid_death_frac_past_two_months = xHerd - xHerd2
             covid_death_frac_prior_to_two_months_ago = xHerd2
+            #=== Couple more death quantities
+            deaths_past_two_weeks = \
+                df_mort_new[df_mort_new.date
+                            > (date_in_forecast - two_weeks)]['deaths'].sum()
+            covid_daily_death_14davg = deaths_past_two_weeks / 14.0
             
             #=== Google facemask trends (six weeks ago)
             xTrends1 = get_val_on_date('trends', df_trends,
-                                       date_in_forecast - fortytwo_days)
-            facemask_trends_42d_ago = xTrends1
+                                       date_in_forecast - six_weeks)
+            facemask_trends_six_weeks_ago = xTrends1
+            xTrends1B = get_val_on_date('trends', df_trends,
+                                       date_in_forecast - four_weeks)
+            facemask_trends_four_weeks_ago = xTrends1B
             
             #=== Mobility (two and four weeks ago)
             xMob1 = get_val_on_date('mob', df_mobility,
@@ -2755,10 +2827,13 @@ def get_forecasted_mortality(province_name, region_name,
             #=== Weather value is 14d average centered three weeks prior (21d)
             xTemp = get_weather_avg_for_day(df_weather, date_in_forecast, 14, 21)
             avg_temp_three_weeks_ago = xTemp
+            xTempB = get_weather_avg_for_day(df_weather, date_in_forecast, 14, 28)
+            avg_temp_four_weeks_ago = xTempB
 
-            #=== Get fraction_vaccinated value (two and four weeks ago)
+            #=== Get fraction_vaccinated value (2, 4, and 6 weeks ago)
             vax_percent_two_weeks_ago = get_val_on_date('vax', df_vax, date_in_forecast - two_weeks)
             vax_percent_four_weeks_ago = get_val_on_date('vax', df_vax, date_in_forecast - four_weeks)
+            vax_percent_six_weeks_ago = get_val_on_date('vax', df_vax, date_in_forecast - six_weeks)
             #=== Forbid vaccination percentage greater than 100%
             #       (but warn user that it is happening)
             if (vax_percent_two_weeks_ago > 1):
@@ -2767,73 +2842,148 @@ def get_forecasted_mortality(province_name, region_name,
             if (vax_percent_four_weeks_ago > 1):
                 vax_percent_four_weeks_ago = 1.0
                 print("    ***Warning***  vax_percent_four_weeks_ago > 1")
-            
-            #=== Calculate the growth rate (lambda) from the
-            #    PWPD_80, the depletion of susceptibles by vaccination,
-            #    and the infection rate constant
-            sqrt_PWPD_80 = pwpd_80**0.5
-            sqrt_proportion_unvax = \
-                (1 - maximum_vaccine_efficacy * vax_percent_four_weeks_ago)**0.5
-            sqrt_mortality_effect = \
-                math.exp(0.5 * (C_deathA * covid_death_frac_past_two_months
-                                + C_deathB * covid_death_frac_prior_to_two_months_ago))
-            # Temperature term depends on type chosen
+            if (vax_percent_six_weeks_ago > 1):
+                vax_percent_six_weeks_ago = 1.0
+                print("    ***Warning***  vax_percent_six_weeks_ago > 1")
+            #=====================================================
+            #======    Calculate the growth rate (lambda)   ======
+            #=====================================================            
+            #
+            # Depends on:
+            #
+            #     - The infection rate constant, k, which depends on
+            #       product of drivers (temperature, google-trends,
+            #       pop sparsity, mobility, delta-variant surge)
+            #
+            #     - The population-weighted population density
+            #       (potentially multiplied by >80 y.o. fraction)
+            #
+            #     - The depletion of susceptibles (using history of
+            #       mortality as a proxy)
+            #
+            #     - The proportion vaccinated
+            #
+            #     - The infectious period, which can depend on some
+            #       drivers (annual death, household number)
+            #=====================================================
+            #
+            #=== Infection rate constant, k
+            #        Temperature term depends on chosen model type
             if (model_temperature_dependence_type == 'cubic'):
                 temp_term = \
                     C_temp_cubic_A * (avg_temp_three_weeks_ago - offset_temp_cubic)**2 \
                     + C_temp_cubic_B * (avg_temp_three_weeks_ago - offset_temp_cubic)**3
-            elif (model_temperature_dependence_type == 'tanh'):
+            elif (model_temperature_dependence_type == 'tanh_half'):
                 temp_term = C_temp_tanh \
                     * ( np.tanh((avg_temp_three_weeks_ago - offset_temp_tanh)/2) - 1 )
-            # Dependence on rate constant is product of driver dependencies
-            log_k_A = (
-                C_logkA0
-                + C_mobA * mobility_two_weeks_ago
-                + C_mobB * mobility_four_weeks_ago
-                + temp_term
-                + C_trends * facemask_trends_42d_ago
-            )
-            # Sparsity term depends on type chosen (although "new" is supposed to be
-            # the one that actually makes sense, and "oldbad" was a mistake)
-            if (model_sparsity_function_type == 'new'):
+            elif (model_temperature_dependence_type == 'tanh'):
+                temp_term = C_temp_tanh \
+                    * (np.tanh(avg_temp_four_weeks_ago - offset_temp_tanh) - 1.0)
+            #        Google trends term depends on chosen model type
+            if (model_trends_dependence_type == 'ramp'):
+                trends_term = (C_trends * facemask_trends_four_weeks_ago
+                               * months_since_apr2020)
+            elif (model_trends_dependence_type == 'noramp'):
+                trends_term = C_trends * facemask_trends_six_weeks_ago
+            #        Sparsity term (k_B) depends on chosen model type
+            if (model_sparsity_function_type == 'oct2021_fixed'):
+                k_B = 1.0 / (
+                    math.sqrt(math.pi) 
+                    * (0.25**(2.0*pop_sparsity))**pop_sparsity_power
+                    )
+            elif (model_sparsity_function_type == 'may2021_notworking'):
                 k_B = 1.0 \
                     / (
                         math.sqrt(math.pi) 
-                        * ( 0.25**(2.0*pop_sparsity) * pwpd_80 )**(1/(2.0 - 2.0*pop_sparsity))
-                    )
-            elif (model_sparsity_function_type == 'oldbad'):
+                        * ( 0.25**(2.0*pop_sparsity) * pwpd_80 )**pop_sparsity_power
+                    )                
+            elif (model_sparsity_function_type == 'original_wrong_but_working'):
                 k_B = (
                     8.0 / pwpd_80
                     * (2.0 - pop_sparsity / 2.0)
-                    )**(1.0/(2.0 - pop_sparsity / 2.0))
-            sqrt_k = (math.exp(log_k_A) * k_B )**0.5
-            # Dependence on inverse infectious period
-            inv_tauI = (
-                C_inv_tauI_0
-                + C_inv_tauI_logAD * (math.log(annual_death, 10)
-                                      - math.log(offset_annual_death, 10))
-                + C_inv_tauI_HN * (N_household - offset_N_household)
-            )
+                )**pop_sparsity_power_orig
+            #        Dependence on rate constant is product of driver dependencies
+            log_k_A = (
+                C_logkA0
+                + C_mob_twowk * mobility_two_weeks_ago
+                + C_mob_fourwk * mobility_four_weeks_ago
+                + temp_term
+                + trends_term
+                )
+            if account_for_delta_variant:
+                log_k_A += C_delta * (
+                    1 + np.tanh(2.0*(months_since_jan2021 - offset_delta_months))
+                )
+            #        Full infection rate constant 
+            infection_rate_constant_k = math.exp(log_k_A) * k_B 
+            #=== PWPD term 
+            if (model_pwpd_dependence == 'pwpd_w_sparsity_power'):
+                pwpd_term = pwpd_80**(1.0 - pop_sparsity_power)
+            elif (model_pwpd_dependence == 'pwpd80'):
+                pwpd_term = pwpd_80
+            #=== Vaccination term
+            if (model_prop_unvax_dependence == 'standard_4wk'):
+                proportion_unvax = \
+                    1 - maximum_vaccine_efficacy * vax_percent_four_weeks_ago
+            elif (model_prop_unvax_dependence == 'exp_6wk'):
+                proportion_unvax = \
+                    math.exp(C_k_vax_six_weeks * vax_percent_six_weeks_ago)
+            #=== Estimate of susceptible fraction (from mortality history)
+            if (model_death_dependence == "simple_two_month"):
+                susceptible_frac_from_mortality = math.exp(
+                    C_death_past_two_months * covid_death_frac_past_two_months
+                    + C_death_prior_to_two_months * covid_death_frac_prior_to_two_months_ago
+                )
+            elif (model_death_dependence == "powerlaw_two_month"):
+                susceptible_frac_from_mortality = math.exp(
+                    C_death_total * covid_death_frac_total**C_death_power
+                    + C_death_past_two_months * (
+                        covid_death_frac_total**C_death_power
+                        - covid_death_frac_prior_to_two_months_ago**C_death_power )
+                )
+            #=== Inverse infectious period
+            if (model_tauI_dependence == "original_annual_death_and_household"):
+                inv_tauI = (
+                    C_inv_tauI_0
+                    + C_inv_tauI_logAD * (math.log(annual_death, 10)
+                                          - math.log(offset_annual_death, 10))
+                    + C_inv_tauI_HN * (N_household - offset_N_household)
+                )
+            elif (model_tauI_dependence == "exp_household_and_lin_dailydeath"):
+                inv_tauI = (
+                    C_inv_tauI_HN * math.exp(
+                        C_inv_tauI_HN_B * (N_household - offset_N_household)
+                    )
+                    + C_inv_tauI_daily_death * (covid_daily_death_14davg
+                                                / annual_death )
+                )
             #=== Calculate the growth rate (lambda) as:
             #
-            #     lambda = sqrt(k PWD_80 unvax_frac)
-            #               + lambda0
+            #     lambda = sqrt(k PWPD_term unvax_frac suscept_prop)
+            #               - 1/infectious_period
             #               + C_vaxrate * [vax2wk - vax4wk]
-            #               + C_AD * [log10(AD) - 3.65 ]
-            #               + C_HN * [N_household - 2.7]
             #
             lambda_val = (
-                sqrt_k * sqrt_PWPD_80 * sqrt_proportion_unvax * sqrt_mortality_effect
+                (
+                    infection_rate_constant_k
+                    * pwpd_term
+                    * proportion_unvax
+                    * susceptible_frac_from_mortality
+                )**0.5
                 - inv_tauI
                 + C_vaxrate * (vax_percent_two_weeks_ago - vax_percent_four_weeks_ago)
             )
             #=== Apply a Gaussian random error to lambda value
             # Past two weeks of death are those since two weeks ago
             #        (future values are zero)
-            deaths_past_two_weeks = \
-                df_mort_new[df_mort_new.date
-                            > (date_in_forecast - two_weeks)]['deaths'].sum()
-            sigma = math.sqrt(0.093 / (14.0 + deaths_past_two_weeks))
+            if (simulation_error_model == "orig_feb2021"):
+                    sigma = math.sqrt(
+                        0.093 / (14.0 + deaths_past_two_weeks)
+                    )
+            elif (simulation_error_model == "new_oct2021"):
+                    sigma = math.sqrt(
+                        0.0549566 / (5.61293 + deaths_past_two_weeks)
+                    )
             if (simulation_error_type == 'normal'):
                 lambda_err = sigma*df_mort_new.at[index, 'std_normal']
             elif (simulation_error_type == '14d_correlated_normal'):
