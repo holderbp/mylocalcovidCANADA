@@ -298,7 +298,7 @@ maximum_vaccine_efficacy = 0.9 # 90%
 #            * has some weird issues, e.g., 
 #
 #
-model_index_to_use = 2  # try to keep most recent in first slot
+model_index_to_use = 0  # try to keep most recent in first slot
 model_pars = {
     'C_logkA_0' : [-3.67955, -5.15327, -7.50188],
     'C_mobility_two_weeks_ago' : [0.0, 0.0122074, 0.011227],
@@ -331,13 +331,13 @@ model_pars = {
     'model_tauI_dependence' : ["exp_household_and_lin_dailydeath",
                                "original_annual_death_and_household",
                                "original_annual_death_and_household"],
-    'C_inverse_tauI_0' : [0.0, 0.039689, 0.0398673],
+    'C_inv_tauI_0' : [0.0, 0.039689, 0.0398673],
     'offset_annual_death' : [None, 4467.0, 4467.0],
-    'C_inverse_tauI_logAD' : [None, 0.00626438, 0.00654545],
+    'C_inv_tauI_logAD' : [None, 0.00626438, 0.00654545],
     'offset_N_household' : [2.7, 2.7, 2.7],
-    'C_inverse_tauI_HN' : [-0.0357106, -0.0215527, -0.0201251],
-    'C_inverse_tauI_HN_B' : [-0.421876, None, None],
-    'C_inverse_tauI_dd' : [0.628129, None, None],
+    'C_inv_tauI_HN' : [0.0357106, -0.0215527, -0.0201251],
+    'C_inv_tauI_HN_B' : [-0.421876, None, None],
+    'C_inv_tauI_dd' : [-0.628129, None, None],
     'C_delta' : [1.18112, 0.0, 0.0],
     'account_for_delta_variant' : [True, False, False],
     'offset_delta_months' : [8.5, None, None],
@@ -374,13 +374,13 @@ model_prop_unvax_dependence = \
     model_pars['model_prop_unvax_dependence'][model_index_to_use]
 model_tauI_dependence = \
     model_pars['model_tauI_dependence'][model_index_to_use]
-C_inv_tauI_0 = model_pars['C_inverse_tauI_0'][model_index_to_use]
+C_inv_tauI_0 = model_pars['C_inv_tauI_0'][model_index_to_use]
 offset_annual_death = model_pars['offset_annual_death'][model_index_to_use]
-C_inv_tauI_logAD = model_pars['C_inverse_tauI_logAD'][model_index_to_use]
+C_inv_tauI_logAD = model_pars['C_inv_tauI_logAD'][model_index_to_use]
 offset_N_household =  model_pars['offset_N_household'][model_index_to_use]
-C_inv_tauI_HN = model_pars['C_inverse_tauI_HN'][model_index_to_use]
-C_inv_tauI_HN_B = model_pars['C_inverse_tauI_HN_B'][model_index_to_use]
-C_inv_tauI_daily_death = model_pars['C_inverse_tauI_dd'][model_index_to_use]
+C_inv_tauI_HN = model_pars['C_inv_tauI_HN'][model_index_to_use]
+C_inv_tauI_HN_B = model_pars['C_inv_tauI_HN_B'][model_index_to_use]
+C_inv_tauI_daily_death = model_pars['C_inv_tauI_dd'][model_index_to_use]
 C_vaxrate = model_pars['C_vaccination_rate'][model_index_to_use]
 offset_delta_months = model_pars['offset_delta_months'][model_index_to_use]
 account_for_delta_variant = model_pars['account_for_delta_variant'][model_index_to_use]
@@ -2983,6 +2983,7 @@ def get_forecasted_mortality(province_name, region_name,
             elif (simulation_error_model == "new_oct2021"):
                     sigma = math.sqrt(
                         0.0549566 / (5.61293 + deaths_past_two_weeks)
+                        + 0.00044113549
                     )
             if (simulation_error_type == 'normal'):
                 lambda_err = sigma*df_mort_new.at[index, 'std_normal']
